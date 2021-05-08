@@ -63,10 +63,10 @@ class Debug{
          */
         /* copy/pasta
 
+
         $debug->to='';//email string
         $debug->message='';//String or array
         $debug->subject='';//String
-        $debug->to='';//email string
         $debug->from='';//email string
         $debug->replyto='';//email string
         $debug->headers='$headers = 'To: Simon <'.$to.'>' . "\r\n";
@@ -75,8 +75,9 @@ class Debug{
         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
         $headers .= "From:  ***FROM NAME*** <***ADD_EMAIL_ADDRESS***> \r\n";
         $headers .= "Reply-To:  ***ADD_EMAIL_ADDRESS***\r\n".'X-Mailer: PHP/' . phpversion();';
-        $debug->to='';//email string
+        $debug->fromname='';//email string
         */
+
         
         $this->headers=$this->headers();
 
@@ -121,8 +122,10 @@ class Debug{
                             $this->prep_display_array($v,$count);
                             $count--;
                 }else{
-                    echo '  <div style="margin-bottom:3px;margin-left:'.$margin.'px;">['.$k.']=>'.$v.'</div>
-                            <div style="clear:both"></div>';
+                    if(!is_object($v)){
+                        echo '  <div style="margin-bottom:3px;margin-left:'.$margin.'px;">['.$k.']=>'.$v.'</div>
+                                <div style="clear:both"></div>';
+                    }
                 }
             }
         }else{
@@ -130,16 +133,19 @@ class Debug{
         }
     }
     
-    public function prs($v='',$return=0){
+    public function pr($val='',$return=0){
+        /**
+         * print_r() clone with formatting
+         */
         //recursive array display buffered and returned
-        
-        if(is_array($v)){
+        $retstr='';
+        if(is_array($val)){
             ob_start();
-                $this->prep_display_array($v,1);
+                $this->prep_display_array($val,1);
             $retstr= ob_get_clean();
 
         }else{
-            $retstr= '<div style="margin:5px 0;">'.$v.'&nbsp;</div>';
+            if(!empty($val))$retstr= '<div style="margin:5px 0;">'.$val.'&nbsp;</div>';
         }
 
         if(empty($return)){
@@ -149,22 +155,50 @@ class Debug{
         }
     }
 
-    public function pr($v,$return=0){
-        //formatted and extended print_r()
-        $this->prs($v);
+    public function prbt($val='',$return=0){
+        /**
+         * print_r() clone with additional backtrace information
+         * $v is a string or array
+         * Formatted and extended print_r()
+         * Provides
+         */
+
+        //initalize the return string
+        $retstr='';
+
+        //gprint the string or recursive travel the array
+        if(!empty($val))$retstr.=$retstr=$this->pr($v,1);
+        
+        
+        
+        //ob_start();
+        //echo '<pre>';
+        //var_dump(debug_backtrace());
+        //echo '<pre>';
+        //$details= ob_get_clean();
         $details=debug_backtrace();
+        
+
+        //$this->prs($details);
         foreach($details as $k=>$v){
-            foreach($details as $k2=>$v2){
-                if($k2=='file'){
-                    echo '<p>';
-                    echo 'File - '.$v['file'];
-                    echo '<br />Line - '.$v['line'];
-                    echo '</p>';
-                }
-            }
+            //if(!is_object($v))$this->prs($v);
+
+
+            $retstr.=$v['file'].' - Line '.$v['line'];
+            if(!empty($v['function']))$retstr.=' <br/>Function - '.$v['function'];
+                if(!empty($v['class']))$retstr.=' <br/>Class - '.$v['class'];
+                $retstr.='<br/><br/>';      
+            
+            //if(!empty($btarr))$retstr.=implode('<br/><br/>',$btarr);
+            
+        }
+        if(empty($return)){
+            echo $retstr;
+        }else{
+            return $retstr;
         }
 
-        if($this->backtrace==1)$this->pb();
+        //if($this->backtrace==1)$this->pb();
 
     }
 
