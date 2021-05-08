@@ -22,8 +22,10 @@ class Debug{
     }
     
     public function headers(){
-        //probably should add a little injection protection here
-        //...But is an admin debug method, so meh
+        /**
+        * probably should add a little injection protection here
+        * ...But is an admin debug method, so meh
+        */
 
         if(empty($this->headers)){
             $this->headers = 'To: Admin <'.$this->to.'>' . "\r\n";
