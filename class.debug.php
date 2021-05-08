@@ -13,7 +13,6 @@ class Debug{
     public $fromname = "PHP Engine";
 
     public function __construct(){
-
     }
     public function __destruct(){
     }
@@ -70,7 +69,6 @@ class Debug{
         $html_message = '<html><body>';
         $html_message .=$message;
         $html_message .= '</body></html>';
-
         mail($this->to,$this->subject.' - '.time(),$html_message,$this->headers);
     }
     
@@ -133,7 +131,6 @@ class Debug{
         }
 
         if($this->backtrace==1)$this->pb();
-
     }
 
     public function pb(){
