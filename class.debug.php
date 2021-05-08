@@ -1,10 +1,11 @@
 <?php
+
 class Debug{
 
     public $level='all';//all, 
     public $backtrace=0;
     public $count;
-    public $to='someone@somehere.com';
+    public $to='someone@somehere.com';//debug default email
     public $message='';//can be string or array
     public $subject='Debug Email - ';
     public $from='noone@nowhere.com';
@@ -13,6 +14,7 @@ class Debug{
     public $fromname = "PHP Engine";
 
     public function __construct(){
+
     }
     public function __destruct(){
     }
@@ -20,12 +22,15 @@ class Debug{
     public function now(){
         return time();
     }
+
+    public function hello(){
+        echo 'hello world!';
+    }
+
     
     public function headers(){
-        /**
-        * probably should add a little injection protection here
-        * ...But is an admin debug method, so meh
-        */
+        //probably should add a little injection protection here
+        //...But is an admin debug method, so meh
 
         if(empty($this->headers)){
             $this->headers = 'To: Admin <'.$this->to.'>' . "\r\n";
@@ -43,7 +48,36 @@ class Debug{
          * create the to/from/subject/message/headers variables before calling the method
          * update defaults to actual emails
          * time() creates unique subject to prevent email clients like gmail, grouping debug mails into a conversation
+         * 
+         * Set default or pass available properties:
+         * 
+         * Setting defaults in Debug class make all properties optional
+         * 
+         * public $to='someone@somehere.com';//debug default email
+         * public $message='';//can be string or array
+         * public $subject='Debug Email - ';
+         * public $from='noone@nowhere.com';
+         * public $replyto='noone@nowhere.com';
+         * public $headers='';//all or nothing
+         * public $fromname = "PHP Engine";
          */
+        /* copy/pasta
+
+        $debug->to='';//email string
+        $debug->message='';//String or array
+        $debug->subject='';//String
+        $debug->to='';//email string
+        $debug->from='';//email string
+        $debug->replyto='';//email string
+        $debug->headers='$headers = 'To: Simon <'.$to.'>' . "\r\n";
+        //replace ***CONTENT*** if adding custom headers
+        $headers .= "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $headers .= "From:  ***FROM NAME*** <***ADD_EMAIL_ADDRESS***> \r\n";
+        $headers .= "Reply-To:  ***ADD_EMAIL_ADDRESS***\r\n".'X-Mailer: PHP/' . phpversion();';
+        $debug->to='';//email string
+        */
+
         //message 
     
         
@@ -71,6 +105,7 @@ class Debug{
         $html_message = '<html><body>';
         $html_message .=$message;
         $html_message .= '</body></html>';
+
         mail($this->to,$this->subject.' - '.time(),$html_message,$this->headers);
     }
     
@@ -133,6 +168,7 @@ class Debug{
         }
 
         if($this->backtrace==1)$this->pb();
+
     }
 
     public function pb(){
