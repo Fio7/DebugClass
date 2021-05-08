@@ -77,9 +77,6 @@ class Debug{
         $headers .= "Reply-To:  ***ADD_EMAIL_ADDRESS***\r\n".'X-Mailer: PHP/' . phpversion();';
         $debug->to='';//email string
         */
-
-        //message 
-    
         
         $this->headers=$this->headers();
 
