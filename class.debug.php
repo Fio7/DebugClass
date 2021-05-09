@@ -2,16 +2,15 @@
 
 class Debug{
 
-    public $level='all';//all, 
-    public $backtrace=0;
-    public $count;
+    
     public $to='someone@somehere.com';//debug default email
     public $message='';//can be string or array
-    public $subject='Debug Email - ';
-    public $from='noone@nowhere.com';
-    public $replyto='noone@nowhere.com';
+    public $subject='Debug Email - ';//debug email subject
+    public $from='noone@nowhere.com';//debug email from
+    public $replyto='noone@nowhere.com'; //debug email reply to
     public $headers='';//all or nothing
-    public $fromname = "PHP Engine";
+    public $fromname = "PHP Engine"; 
+
 
     public function __construct(){
 
@@ -30,7 +29,7 @@ class Debug{
     
     public function headers(){
         //probably should add a little injection protection here
-        //...But is an admin debug method, so meh
+        //...But is an admin debug method, so...
 
         if(empty($this->headers)){
             $this->headers = 'To: Admin <'.$this->to.'>' . "\r\n";
@@ -61,16 +60,17 @@ class Debug{
          * public $headers='';//all or nothing
          * public $fromname = "PHP Engine";
          */
-        /* copy/pasta
 
+         /* copy/pasta
 
         $debug->to='';//email string
         $debug->message='';//String or array
         $debug->subject='';//String
         $debug->from='';//email string
         $debug->replyto='';//email string
-        $debug->headers='$headers = 'To: Simon <'.$to.'>' . "\r\n";
+
         //replace ***CONTENT*** if adding custom headers
+        $debug->headers='$headers = 'To: Simon <'.$to.'>' . "\r\n";
         $headers .= "MIME-Version: 1.0" . "\r\n";
         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
         $headers .= "From:  ***FROM NAME*** <***ADD_EMAIL_ADDRESS***> \r\n";
@@ -80,37 +80,21 @@ class Debug{
 
         
         $this->headers=$this->headers();
-
-        if(!empty($this->message)){
-            if(is_array($this->message)){
-                $message=$this->prs($this->message,1);
-                $message=$message."<br/><br/>"; //adda space before dumping backtrace data
-            }
-        }
+        $message=$this->prbt($this->message,1,1);
         
-        $details=debug_backtrace();
-        foreach($details as $k=>$v){
-            foreach($details as $k2=>$v2){
-                if($k2=='file'){
-                    $message.='<p>';
-                    $message.= 'File - '.$v['file'];
-                    $message.= '<br />Line - '.$v['line'];
-                    $message.= '</p>';
-                }
-            }
-        }
-        
-        $html_message = '<html><body>';
-        $html_message .=$message;
-        $html_message .= '</body></html>';
+    
+        $html_message = '<html><body>'.$message.'</body></html>';
 
         mail($this->to,$this->subject.' - '.time(),$html_message,$this->headers);
     }
     
     /*display tools*/
     private function prep_display_array($arr,$count){
-        //display_array()'s worker bee function
-        //style not classes (for email use)
+        /**
+         * display_array()'s worker bee function
+         * inline style not classes (for email friendliness)
+         */
+
         ksort($arr);
         if(is_array($arr)){
             foreach($arr as $k=> $v){
@@ -135,7 +119,7 @@ class Debug{
     
     public function pr($val='',$return=0){
         /**
-         * print_r() clone with formatting
+         * print_r() clone with display formatting
          */
         //recursive array display buffered and returned
         $retstr='';
@@ -155,43 +139,36 @@ class Debug{
         }
     }
 
-    public function prbt($val='',$return=0){
+    public function prbt($val='',$return=0,$level=0){
         /**
-         * print_r() clone with additional backtrace information
+         * print_r() clone with formatting and additional backtrace information 
          * $v is a string or array
-         * Formatted and extended print_r()
-         * Provides
+         * $return with 1, or echo with 0. Default is to echo to screen
+         * $level Provides all backtrace info, 0 (default) is just first part of backtrace originaing the call. 1 for all
+         * intentionally not passing in properties for quick dirty uses. 
          */
 
         //initalize the return string
         $retstr='';
 
         //gprint the string or recursive travel the array
-        if(!empty($val))$retstr.=$retstr=$this->pr($v,1);
+        if(!empty($val))$retstr.=$this->pr($val,1);
         
-        
-        
-        //ob_start();
-        //echo '<pre>';
-        //var_dump(debug_backtrace());
-        //echo '<pre>';
-        //$details= ob_get_clean();
         $details=debug_backtrace();
         
-
         //$this->prs($details);
+
         foreach($details as $k=>$v){
-            //if(!is_object($v))$this->prs($v);
-
-
+            //format and display the backtrace
+            $retstr.='<br/>';   
             $retstr.=$v['file'].' - Line '.$v['line'];
             if(!empty($v['function']))$retstr.=' <br/>Function - '.$v['function'];
-                if(!empty($v['class']))$retstr.=' <br/>Class - '.$v['class'];
-                $retstr.='<br/><br/>';      
-            
-            //if(!empty($btarr))$retstr.=implode('<br/><br/>',$btarr);
+                if(!empty($v['class']))$retstr.=' <br/>Class - '.$v['class'];   
+                $retstr.='<br/>';
+                if ($all===0)break; //stunt the backtrace to first instance only
             
         }
+        $retstr.='<br/>---<br/>';   
         if(empty($return)){
             echo $retstr;
         }else{
