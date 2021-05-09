@@ -2,12 +2,81 @@
 
 class Debug{
 
+    /**
+     * Class with useful debugging functions.
+     * 
+     * Update default properties
+     * 
+     * >>USES<<
+     * $cars = array (
+     *     array("Volvo",22,18),
+     *     array("BMW",15,13),
+     *     array("Saab",5,2),
+     *     array("Land Rover",17,15)
+     * 
+     *   );
+     * 
+     *  
+     * ```````````````````````````````````
+     * Display or return STRINGS and VARS
+     * ```````````````````````````````````
+     * (assuming debug class object is $db)
+     * Display and array
+     * 
+     * 
+     * 
+     * Display formatted multidimensional array. 
+     * $db->pr($cars);
+     * 
+     * Display the string
+     * $db->pr('Show me cars');
+     * 
+     * Display multidimensional array with backtrace info
+     * $db->prbt($cars);
+     * 
+     * Display string with backtrace info
+     * $db->prbt('show me cars');
+     * 
+     * `````````````````````
+     * Send debugging email
+     * `````````````````````
+     * 
+     * Email is also used in debugging. 
+     * If defaults are updated, all options become optional
+     * Custom headers allowed
+     * $replyto defaults to $from if omitted
+     * 
+     * dmail() $message parameters can be passed in the method call, or as a property $db->message before calling the method. Prameter overides property
+     * The thinking here is to make it's use quick and easy as it's an everyday debug function, particularly useful in ajax development.
+     * 
+     * //set properties
+     * $db->to='myemail@gmail.com ';//email string
+     * $db->message='';//String or array
+     * $db->subject='';//String
+     * $db->from='me@gmail.com';//email string
+     *
+     * //typical use 
+     * //quick and dirty is sometimes preferred!
+     * 
+     * $db->dmail($cars);
+     * $db->dmail('cars');
+     * $db->dmail();
+     * 
+     * $db->message=$cars;
+     * $db->dmail();
+     * $db->message='cars2';
+     * $db->dmail();
+     * $db->message='';
+     * $db->dmail();
+     * 
+     */
+
     
-    public $to='someone@somehere.com';//debug default email
-    public $message='';//can be string or array
+    public $to='devsemail@somehere.com';//debug default email
+    public $message='';//String or array. Alternative property way to send message. Overwritten by method property $message. 
     public $subject='Debug Email - ';//debug email subject
-    public $from='noone@nowhere.com';//debug email from
-    public $replyto='noone@nowhere.com'; //debug email reply to
+    public $from='noone@nowhere.com';//debug email from. not relevant in debugging
+    public $replyto=''; //optional debug email reply to. If empty defaults to $from
     public $headers='';//all or nothing
     public $fromname = "PHP Engine"; 
 
@@ -36,14 +105,18 @@ class Debug{
             $this->headers .= "MIME-Version: 1.0" . "\r\n";
             $this->headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
             $this->headers .= "From:  Debug email <".$this->from."> \r\n";
-            $this->headers .= "Reply-To:  ".$this->replyto."\r\n".'X-Mailer: PHP/' . phpversion();
+            $this->headers .= "Reply-To:  ".(!empty($this->replyto)?$this->replyto:(!empty($this->from)?$this->from:'nobody@nowhere.com'))."\r\n".'X-Mailer: PHP/' . phpversion();
         }
         return $this->headers;//necessary? >>test
     }
     
-    public function dmail(){
+    public function dmail($message=''){
         /**
          * Debug mailer
+         * $message overrides class property for ease of use
+         * 
+         * Full backtrace baked in ($all=1)
+         * 
          * create the to/from/subject/message/headers variables before calling the method
          * update defaults to actual emails
          * time() creates unique subject to prevent email clients like gmail, grouping debug mails into a conversation
@@ -62,6 +135,7 @@ class Debug{
          */
 
          /* copy/pasta
+
         $debug->to='';//email string
         $debug->message='';//String or array
         $debug->subject='';//String
@@ -78,11 +152,13 @@ class Debug{
         */
 
         
-        $this->headers=$this->headers();
-        $message=$this->prbt($this->message,1,1);
         
-    
-        $html_message = '<html><body>'.$message.'</body></html>';
+        $this->headers=$this->headers();
+
+        $message=(!empty($message)?$this->prbt($message,1,1):(!empty($this->message)?$this->prbt($this->message,1,1):$this->prbt('',1,1)));
+        //echo $message;
+        
+        $html_message = '<html><body>'.$this->pr($message,1).'</body></html>';
 
         mail($this->to,$this->subject.' - '.time(),$html_message,$this->headers);
     }
@@ -138,12 +214,12 @@ class Debug{
         }
     }
 
-    public function prbt($val='',$return=0,$level=0){
+    public function prbt($val='',$return=0,$all=0){
         /**
          * print_r() clone with formatting and additional backtrace information 
          * $v is a string or array
          * $return with 1, or echo with 0. Default is to echo to screen
-         * $level Provides all backtrace info, 0 (default) is just first part of backtrace originaing the call. 1 for all
+         * $all Provides all backtrace info, 0 (default) is just first part of backtrace originaing the call. 1 for all
          * intentionally not passing in properties for quick dirty uses. 
          */
 
