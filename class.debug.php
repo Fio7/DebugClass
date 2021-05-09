@@ -62,7 +62,6 @@ class Debug{
          */
 
          /* copy/pasta
-
         $debug->to='';//email string
         $debug->message='';//String or array
         $debug->subject='';//String
